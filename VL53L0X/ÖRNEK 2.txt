@@ -1,0 +1,70 @@
+#include <Adafruit_VL53L0X.h>
+#include <Wire.h>
+
+const byte ledPin = 13;
+const int maxDistance = 200 ; // mm
+
+Adafruit_VL53L0X lox = Adafruit_VL53L0X();
+bool detected = false ;
+
+void setup(){
+Serial.begin(9600);
+pinMode (ledPin,OUTPUT);
+
+if(!lox.begin(0x29)){
+	Serial.println(F("Failed to connect to VL53L0X")); // RAM israfını önler
+}
+}
+
+// Cisim ilk kez algılandığında LED yanar ve seri monitöre bilgi yazılır.
+
+void inputDetected(){
+	digitalWrite(ledPin,HIGH);
+	Serial.print("New input detected");
+	detected = true;
+}
+
+// Cisim algılanmaya devam ettiği sürece mesafe seri monitöre yazılır.
+
+void inputHeld(int distance) {
+
+Serial.print(distance);
+Serial.print(" , ");
+}
+
+// Cisim uzaklaştığında LED söner ve bilgi yazılır.
+
+void inputRemoved() {
+digitalWrite(ledPin,LOW);
+Serial.println("removed");
+detected = false;
+}
+
+
+void loop() {
+
+// Ölçüm yapılıp sonuç measure değişkenine atanır
+
+VL53L0X_RangingMeasurementData_t measure;
+lox.rangingTest(&measure, false);
+
+// Kapsama alanı
+
+if (measure.RangeStatus != 4 && measure.RangeMillimeter > 0 && measure.RangeMillimeter < maxDistance)
+	if(detected == false) {
+	inputDetected(); // Cisim ilk defa algılandıysa 
+}
+else {
+	inputHeld(measurement.RangeMillimeter) // Zaten bir cisim varsa
+}
+}
+
+// Kapsama alanı dışındayken
+else{
+
+if(detected) {
+inputRemoved(); // daha önce cisim algılandıysa
+}
+}
+
+delay(10);

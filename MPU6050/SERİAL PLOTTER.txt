@@ -1,0 +1,41 @@
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
+float Ax;
+float Ay;
+float Az;
+
+Adafruit_MPU6050 mpu;
+
+void setup(){
+Serial.begin(115200);
+mpu.begin();
+Serial.println("MPU6050 Started ");
+mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
+mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+
+}
+
+void loop(){
+sensors_event_t a, g, temp; // bütün değişkenleri tanımlamazsan hata veriyor
+mpu.getEvent(&a, &g, &temp); // Gelen verileri a ya atar
+Ax = a.acceleration.x;
+Ay = a.acceleration.y;
+Az = a.acceleration.z
+Serial.print("Ax: "); // Etiketleme için
+Serial.print(Ax);
+Serial.print(' , ');
+Serial.print("Ay: ");
+Serial.println(Ay);
+Serial.print(',');
+Serial.print("Az: ");
+Serial.println(Az);
+Serial.print(' , ');
+Serial.print(" UL: "); // Upper Limit
+Serial.print(1); // grafiği sınırlamak için
+Serial.print(','); // Virgülle ayırmazsan grafikte göremezsin
+Serial.print(" LL: ");
+Serial.print(-1);
+
+delay (50);
+}
