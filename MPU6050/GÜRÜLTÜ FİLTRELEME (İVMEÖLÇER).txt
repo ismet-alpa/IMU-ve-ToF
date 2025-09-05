@@ -1,0 +1,81 @@
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
+float Ax;
+float Ay;
+float Az;
+ 
+// Bu kısım bizde değişecek
+float xMax= 1.03;
+float xMin= -.97;
+float yMax= .98;
+float yMin= -1.01;
+float zMax=.96 ;
+float zMin= -1.08;
+ 
+float xOffset = (xMax+xMin)/2;
+float yOffset = (yMax+yMin)/2;
+float zOffset = (zMax+zMin)/2;
+ 
+float xScale = 2/(xMax -xMin);
+float yScale = 2/(yMax - yMin);
+float zScale = 2/(zMax -zMin);
+ 
+float roll=0;
+float pitch=0;
+float rollRAW;
+float pitchRAW;
+ 
+ Adafruit_ MPU6050 mpu;
+ 
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  mpu.begin();
+  Serial.println("MPU6050 Started!");
+  mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+ 
+ 
+}
+ 
+void loop() {
+  // put your main code here, to run repeatedly:
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+  Ax=a.acceleration.x/9.81;
+  Ay=a.acceleration.y/9.81;
+  Az=a.acceleration.z/9.81;
+ 
+
+  Ax = xScale*(Ax-xOffset);
+  Ay = yScale*(Ay-yOffset);
+  Az = zScale*(Az-zOffset);
+ 
+// kalibre edilmemiş veriler
+  pitchRAW = atan2(Ay,sqrt(Az*Az+Ax*Ax))*360/(2*3.14);
+  rollRAW = atan2(Ax,sqrt(Az*Az+Ay*Ay))*360/(2*3.14);
+ 
+// Low Pass Filtre
+  pitch = .75*pitch + .25*pitchRAW;
+  roll = .75*roll + .25*rollRAW;
+ 
+  Serial.print("RollRAW:");
+  Serial.print(rollRAW);
+  Serial.print(',');
+  Serial.print("PitchRAW:");
+  Serial.print(pitchRAW);
+    Serial.print(',');
+  Serial.print("Roll:");
+  Serial.print(roll);
+  Serial.print(',');
+  Serial.print("Pitch:");
+  Serial.print(pitch);
+    Serial.print(',');
+   Serial.print("UL:");
+ Serial.print(90);
+ Serial.print(',');
+ Serial.print("LL:");
+ Serial.println(-90);
+  delay(50);
+ 
+}

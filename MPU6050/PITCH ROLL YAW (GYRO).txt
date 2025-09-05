@@ -1,0 +1,76 @@
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
+
+float Gx;
+float Gy;
+float Gz;
+ 
+float rollG=0;  // x ekseninde dönme
+float pitchG=0; // y ekseninde dönme
+float yawG=0;   // z ekseninde dönme
+ 
+int tStart = millis(); // Başlangıç zamanı
+ 
+ 
+float roll = 0;
+float pitch = 0;
+ 
+ Adafruit_MPU6050 mpu;
+ 
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  mpu.begin();
+  Serial.println("MPU6050 Started!");
+  mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
+  mpu.setGyroRange(MPU6050_RANGE_250_DEG);
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+ 
+tStart = millis();
+}
+ 
+void loop() {
+  // put your main code here, to run repeatedly:
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+ 
+  Gx = g.gyro.x;
+  Gy = g.gyro.y;
+  Gz = g.gyro.z;
+
+// Derece/saniye cinsinden
+rollG = rollG + (millis() - tStart)/1000. * Gy *360./2./3.14;
+pitchG = pitchG + (millis() - tStart)/1000. * Gx *360./2./3.14;
+yawG = yawG + (millis() - tStart)/1000. * Gz *360./2./3.14;
+tStart = millis();
+
+ 
+  pitchRAW = atan2(Ay, sqrt(Az * Az + Ax * Ax)) * 360 / (2 * 3.14);
+  rollRAW = atan2(Ax, sqrt(Az * Az + Ay * Ay)) * 360 / (2 * 3.14);
+ 
+  Serial.print("Gx:");
+  Serial.print(Gx);
+  Serial.print(',');
+  Serial.print("Gy:");
+  Serial.print(Gy);
+  Serial.print(',');
+  Serial.print("Gz:");
+  Serial.print(Gz);
+  Serial.print(',');
+  Serial.print("rollG:");
+  Serial.print(rollG);
+  Serial.print(',');
+  Serial.print("pitchG:");
+  Serial.print(pitchG);
+  Serial.print(',');
+  Serial.print("yawG:");
+  Serial.print(yawG);
+  Serial.print(',');
+  Serial.print("UL:");
+  Serial.print(45); // Derece
+  Serial.print(',');
+  Serial.print("LL:");
+  Serial.println(-45);
+ 
+  
+  delay(10);
